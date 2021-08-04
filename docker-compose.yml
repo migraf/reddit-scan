@@ -1,0 +1,16 @@
+version: '3.8'
+
+volumes:
+  reddit_data:
+    external: True
+
+services:
+  mongo:
+    image: mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    volumes:
+      - reddit_data:/data/db
+    ports:
+      - 27017:27017
