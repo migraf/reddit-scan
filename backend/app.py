@@ -10,12 +10,29 @@ import uvicorn
 from dotenv import load_dotenv, find_dotenv
 import praw
 from pymongo import MongoClient
+from starlette.middleware.cors import CORSMiddleware
 
 from models import StudentModel, UpdateStudentModel, SubredditModel
 from scanners.subreddits import SubredditsScraper
 
 load_dotenv(find_dotenv())
 app = FastAPI()
+
+
+origins = [
+    "*",
+    "http://localhost",
+    "http://localhost:5000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 
 @app.get("/subreddits/default", response_description="Get the stats for the default subreddits", response_model=List[SubredditModel])

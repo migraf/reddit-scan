@@ -45,6 +45,9 @@ class SubredditModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     display_name: str = Field(...)
     subscribers: int = Field(...)
+    public_description: str = Field(...)
+    icon_img: str = Field(...)
+    over18: bool = Field(...)
 
     class Config:
         allow_population_by_field_name = True
