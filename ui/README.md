@@ -9,8 +9,8 @@ This is a project template for [Svelte](https://svelte.dev) apps. It lives at ht
 To create a new project based on this template using [degit](https://github.com/Rich-Harris/degit):
 
 ```bash
-npx degit sveltejs/template svelte-backend
-cd svelte-backend
+npx degit sveltejs/template svelte-api
+cd svelte-api
 ```
 
 *Note that you will need to have [Node.js](https://nodejs.org) installed.*
@@ -21,7 +21,7 @@ cd svelte-backend
 Install the dependencies...
 
 ```bash
-cd svelte-backend
+cd svelte-api
 npm install
 ```
 

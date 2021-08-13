@@ -3,3 +3,4 @@ fastapi[all]
 praw
 loguru
 mongita
+pendulum

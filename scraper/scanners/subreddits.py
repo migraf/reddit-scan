@@ -6,17 +6,17 @@ from praw import models
 import os
 from dotenv import load_dotenv, find_dotenv
 from pprint import pprint
+import pendulum
 
-
-from logger import logger
-from base import Scraper
-
+from scraper.logging import logger
+from scraper.scanners.base import Scraper
 
 
 class SubredditsScraper(Scraper):
 
     def __init__(self, reddit: praw.Reddit, subreddits: List[str] = None, name: str = None,
-                 mongo_client: MongoClient = None, store_results: bool = True, new: bool = False, default: bool = False,
+                 mongo_client: Union[MongoClient, mongita.MongitaClientDisk, mongita.MongitaClientMemory] = None,
+                 store_results: bool = True, new: bool = False, default: bool = False,
                  popular: bool = False, variables: List[str] = None):
 
         super().__init__(reddit, name=name, mongo_client=mongo_client, store_results=store_results, variables=variables)
@@ -51,14 +51,32 @@ class SubredditsScraper(Scraper):
         # self.default_subreddits_collection.create_index({"display_name": 1}, {"unique": True})
 
         for subreddit_info in results:
+            subreddit_document = self.subreddits_collection.find_one(
+                {"display_name": subreddit_info["display_name"]})
 
-            if self.subreddits_collection.find({"display_name": subreddit_info["display_name"]}):
+            if subreddit_document:
                 logger.info("Subrreddit {} already in collection.", subreddit_info["display_name"])
+                subscriber_counts = subreddit_document.get("subscriber_counts", None)
+                if subscriber_counts:
+                    subscriber_counts.append(
+                        {
+                            "timestamp": pendulum.now().to_iso8601_string(),
+                            "subscribers": subreddit_document["subscribers"]
+                        }
+                    )
+                else:
+                    subscriber_counts = [{
+                        "timestamp": pendulum.now().to_iso8601_string(),
+                        "subscribers": subreddit_document["subscribers"]
+                    }]
+
+                self.subreddits_collection.update_one(
+                    {"display_name": subreddit_info["display_name"]},
+                    {"$set": {"subscriber_counts": subscriber_counts}}
+                )
             else:
-                res = self.default_subreddits_collection.insert_one(subreddit_info)
-
-
-
+                res = self.subreddits_collection.insert_one(subreddit_info)
+                logger.info("Added subreddit {} \n at: {}", subreddit_info["display_name"], res)
 
     def get_subreddit_info(self, subreddit: praw.models.Subreddit) -> Tuple[dict, dict]:
         # Also init lazy loading
@@ -72,9 +90,12 @@ class SubredditsScraper(Scraper):
         return all_vars, {}
 
     def get_stored_data(self):
+        logger.info("Getting stored subreddit data.")
         results = self.subreddits_collection.find({})
+        print(len(list(results)))
         subreddits = []
         for subreddit in results:
+            print(subreddit)
             subreddits.append(subreddit)
         return subreddits
 
@@ -103,7 +124,7 @@ class SubredditsScraper(Scraper):
 
 if __name__ == '__main__':
     load_dotenv(find_dotenv())
-    mongita_client = mongita.MongitaClientDisk(host="../data")
+    mongita_client = mongita.MongitaClientDisk(host=os.getenv("MONGITA_HOST"))
     reddit_client = praw.Reddit(
         client_id=os.getenv("REDDIT_CLIENT_ID"),
         client_secret=os.getenv("REDDIT_CLIENT_SECRET"),
@@ -118,5 +139,5 @@ if __name__ == '__main__':
 
     sub_parser = SubredditsScraper(reddit_client, mongo_client=mongita_client, default=True, popular=True,
                                    name="main_subreddit_scraper", variables=sel_vars, store_results=True)
-    sub_parser.scrape()
-    # pprint(sub_parser.get_stored_data())
+    # sub_parser.scrape()
+    pprint(sub_parser.get_stored_data())
