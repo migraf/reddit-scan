@@ -8,8 +8,8 @@ from dotenv import load_dotenv, find_dotenv
 from pprint import pprint
 
 
-from scanners.logger import logger
-from scanners.base import Scraper
+from logger import logger
+from base import Scraper
 
 
 
@@ -29,7 +29,7 @@ class SubredditsScraper(Scraper):
         if not (self.popular or self.default or self.new or self.subreddits):
             raise ValueError("No subreddits given to scrape.")
 
-        self.default_subreddits_collection = self.db["default_subreddits"]
+        self.subreddits_collection = self.db["default_subreddits"]
 
     def scrape(self):
 
@@ -50,10 +50,14 @@ class SubredditsScraper(Scraper):
         super().save_results(results=results)
         # self.default_subreddits_collection.create_index({"display_name": 1}, {"unique": True})
 
-        print(type(results))
-        print(type(results[0]))
-        pprint(results[0])
-        res = self.default_subreddits_collection.insert_many(results)
+        for subreddit_info in results:
+
+            if self.subreddits_collection.find({"display_name": subreddit_info["display_name"]}):
+                logger.info("Subrreddit {} already in collection.", subreddit_info["display_name"])
+            else:
+                res = self.default_subreddits_collection.insert_one(subreddit_info)
+
+
 
 
     def get_subreddit_info(self, subreddit: praw.models.Subreddit) -> Tuple[dict, dict]:
@@ -68,7 +72,7 @@ class SubredditsScraper(Scraper):
         return all_vars, {}
 
     def get_stored_data(self):
-        results = self.default_subreddits_collection.find({})
+        results = self.subreddits_collection.find({})
         subreddits = []
         for subreddit in results:
             subreddits.append(subreddit)
@@ -112,7 +116,7 @@ if __name__ == '__main__':
     # coll.drop()
     sel_vars = ["_path", "display_name", "subscribers", "over18", "icon_img"]
 
-    sub_parser = SubredditsScraper(reddit_client, mongo_client=mongita_client, default=True, popular=False,
+    sub_parser = SubredditsScraper(reddit_client, mongo_client=mongita_client, default=True, popular=True,
                                    name="main_subreddit_scraper", variables=sel_vars, store_results=True)
-    # sub_parser.scrape()
-    pprint(sub_parser.get_stored_data())
+    sub_parser.scrape()
+    # pprint(sub_parser.get_stored_data())
