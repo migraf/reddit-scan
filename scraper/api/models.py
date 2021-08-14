@@ -1,4 +1,5 @@
-from typing import Optional
+import datetime
+from typing import Optional, List
 
 from bson import ObjectId
 from pydantic import BaseModel, Field, EmailStr
@@ -41,26 +42,24 @@ class StudentModel(BaseModel):
         }
 
 
+class SubscriberCount(BaseModel):
+    timestamp: datetime.datetime
+    subscribers: int
+
+
 class SubredditModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     display_name: str = Field(...)
     subscribers: int = Field(...)
     public_description: str = Field(...)
-    icon_img: str = Field(...)
+    icon_img: Optional[str] = Field(...)
     over18: bool = Field(...)
+    subscriber_counts: Optional[List[SubscriberCount]] = Field(...)
 
     class Config:
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
-        schema_extra = {
-            "example": {
-                "name": "Jane Doe",
-                "email": "jdoe@example.com",
-                "course": "Experiments, Science, and Fashion in Nanophotonics",
-                "gpa": "3.0",
-            }
-        }
 
 
 class UpdateStudentModel(BaseModel):

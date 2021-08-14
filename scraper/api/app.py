@@ -41,7 +41,7 @@ async def get_default_subreddits():
     )
     sel_vars = ["_path", "display_name", "subscribers", "over18", "icon_img"]
     sub_parser = SubredditsScraper(reddit_client, mongo_client=client, default=True,
-                                   name="default_subreddit_scraper", variables=sel_vars)
+                                   name="main_subreddit_scraper", variables=sel_vars)
 
     default_subreddits = sub_parser.get_stored_data()
     return default_subreddits

@@ -4,3 +4,4 @@ praw
 loguru
 mongita
 pendulum
+apache-airflow

@@ -91,11 +91,9 @@ class SubredditsScraper(Scraper):
 
     def get_stored_data(self):
         logger.info("Getting stored subreddit data.")
-        results = self.subreddits_collection.find({})
-        print(len(list(results)))
+        results = list(self.subreddits_collection.find({}))
         subreddits = []
         for subreddit in results:
-            print(subreddit)
             subreddits.append(subreddit)
         return subreddits
 
@@ -107,6 +105,7 @@ class SubredditsScraper(Scraper):
         results = []
         for sub_r in subreddits:
             info, vars = self.get_subreddit_info(sub_r)
+            info["is_default"] = False
             results.append(info)
         return results
 
@@ -119,6 +118,7 @@ class SubredditsScraper(Scraper):
         for sub_r in subreddits:
             info, vars = self.get_subreddit_info(sub_r)
             results.append(info)
+            info["is_default"] = True
         return results
 
 
