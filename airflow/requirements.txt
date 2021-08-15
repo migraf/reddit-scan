@@ -4,4 +4,6 @@ loguru
 mongita
 pymongo
 pendulum
-apache-airflow[postgres]
+apache-airflow
+apache-airflow-providers-mongo
+apache-airflow-providers-postgres
