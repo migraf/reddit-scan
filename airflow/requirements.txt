@@ -1,7 +1,7 @@
 pandas
-fastapi[all]
 praw
 loguru
 mongita
+pymongo
 pendulum
 apache-airflow[postgres]
