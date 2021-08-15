@@ -10,4 +10,5 @@ if __name__ == '__main__':
     log_config["formatters"]["access"]["fmt"] = "%(asctime)s - %(levelname)s - %(message)s"
     log_config["formatters"]["default"]["fmt"] = "%(asctime)s - %(levelname)s - %(message)s"
 
-    uvicorn.run("app:app", port=8000, host="0.0.0.0", reload=True, reload_dirs=["../scanners", "."], log_config=log_config)
+    uvicorn.run("api.app:app", port=8000, host="0.0.0.0", reload=True, reload_dirs=["../scraper", "."],
+                log_config=log_config)
